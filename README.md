@@ -10,7 +10,11 @@ ref: https://wiki.freecadweb.org/Create_a_FeaturePython_object_part_I?fbclid=IwA
 
 1. find your FreeCad Macro folder
 - On Linux it is usually /home/<username>/.FreeCAD/Macro/.
-- On Windows it is %APPDATA%\FreeCAD\Macro\, which is usually C:\Users\<username>\Appdata\Roaming\FreeCAD\Macro\.
+- On Windows it is %APPDATA%\FreeCAD\Macro\, which is usually C:\Users\<username>\Appdata\Roaming\FreeCAD\Macro\.      (Appdata is a hidden folder you need to manually enter the path into your file explorer bar)
 - On Mac OSX it is usually /Users/<username>/Library/Preferences/FreeCAD/Macro/.
+ 
+ 2. Navigate to this Macro folder and run
+  ```git init```
+ ``` git clone https://github.com/ethanbonn/capstone_simulation```
 
 
