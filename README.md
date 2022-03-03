@@ -24,7 +24,8 @@
   - Start FreeCAD (if you haven't done so already).
   - Enable the Report view (View → Panels → Report view).
   - Enable the Python console (View → Panels → Python console) see FreeCAD Scripting Basics.
- 2. import modules from our workspace in the python console at the bottom of freecad page
+ 2. Create an active document in FreeCAD (file->new) 
+ 3. import modules from our workspace in the python console at the bottom of freecad page
   (ex. ``` from capstone_simulation import surface```)
  
  
