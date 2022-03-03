@@ -26,7 +26,7 @@
   - Enable the Python console (View → Panels → Python console) see FreeCAD Scripting Basics.
  2. Create an active document in FreeCAD (file->new) 
  3. import modules from our workspace in the python console at the bottom of freecad page
-  (ex. ``` from capstone_simulation import surface```)
+  (ex. ``` from capstone_simulation.box import box``` then ``` b = box.create('my box')``` now you should be seeing a box on screen)
  
  
  ## Updating code:
