@@ -9,6 +9,8 @@
 ref: https://wiki.freecadweb.org/Create_a_FeaturePython_object_part_I?fbclid=IwAR2IuU-8pjwPKtxybKVzVR6dMkJQGhRaON8HFrxmRCwhsQAi4Ba7HX2oa0E
 
 1. find your FreeCad Macro folder
- -v 
+- On Linux it is usually /home/<username>/.FreeCAD/Macro/.
+- On Windows it is %APPDATA%\FreeCAD\Macro\, which is usually C:\Users\<username>\Appdata\Roaming\FreeCAD\Macro\.
+- On Mac OSX it is usually /Users/<username>/Library/Preferences/FreeCAD/Macro/.
 
 
