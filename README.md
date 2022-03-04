@@ -28,8 +28,11 @@
  3. To render the cpv cell model, run: 
     ```
     from capstone_simulation.cell import mirror, sillicon
-    ``` then ``` mirror(x0=1, y0=1/2, x1=0.9, y1=1/2, x2=1, y2=7/16, width=1 ) ``` to render the mirror, and ``` sillicon(x1=0.9, y1=1/2, x2=1, y2=7/16, width=1)``` to render the semi-conductor
-  note: you don't need these class arguments as they are already preset, only use them if you want to change something
+    ``` 
+    then 
+    ``` mirror(x0=1, y0=1/2, x1=0.9, y1=1/2, x2=1, y2=7/16, width=1 ) ``` 
+    to render the mirror, and ``` sillicon(x1=0.9, y1=1/2, x2=1, y2=7/16, width=1)``` to render the semi-conductor
+    note: you don't need these class arguments as they are already preset, only use them if you want to change something
     
  
  
