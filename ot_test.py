@@ -1,9 +1,17 @@
+FREECAD_PATH = "C:/Program Files/FreeCAD 0.19/bin/"
+import sys
+sys.path.append(FREECAD_PATH) 
+
 import FreeCAD as App
 import Part
 import numpy as np
 from scipy.integrate import solve_ivp
 import Draft
-import OTSun
+import otsun
+
+WAVELENGTH_IN_NANOMETERS = 10
+
+doc = App.newDocument()
 
 
 class mirror():
@@ -15,12 +23,18 @@ class mirror():
         curveA = Draft.make_bspline([App.Vector(*p) for p in curve_a])
         curveB = Draft.make_bspline([App.Vector(*p) for p in curve_b])
 
-        App.ActiveDocument.recompute()
+        # doc.recompute()
+
 
         mirror = App.ActiveDocument.addObject('Surface::GeomFillSurface', 'Mirror')
+        # mirror.Label = "Mirror #1"
+        mirror.Label = "Mirror(Mir1)"
         mirror.BoundaryList = [(curveA, "Edge1"), (curveB, "Edge1")]
 
+        self.obj = mirror
+
         App.ActiveDocument.recompute()
+
 
 
 
@@ -57,6 +71,8 @@ class mirror():
         # return np.vstack((sol.t, sol.y[0], np.zeros(len(sol.t)))).T.tolist(), np.vstack((sol.t, sol.y[0], np.ones(len(sol.t)) * self.width)).T.tolist()
         return np.vstack((sol.t, np.zeros(len(sol.t)), sol.y[0])).T.tolist(), np.vstack((sol.t, np.ones(len(sol.t)) * self.width, sol.y[0])).T.tolist()
 
+    def getObj(self):
+        return self.obj
 
 
 class sillicon():
@@ -71,9 +87,13 @@ class sillicon():
         App.ActiveDocument.recompute()
 
         semi = App.ActiveDocument.addObject('Surface::GeomFillSurface', 'Semi-Conductor')
+        semi.Label = "Semi_Conductor(Mat2)"
         semi.BoundaryList = [(lineA, "Edge1"), (lineB, "Edge1")]
 
+        self.obj = semi
+
         App.ActiveDocument.recompute()
+
 
 
     def compute_edges(self, num_sim_points=100):
@@ -86,21 +106,52 @@ class sillicon():
         # return np.vstack((x, y, np.zeros(num_sim_points))).T.tolist(), np.vstack((x, y, np.ones(num_sim_points) * self.width)).T.tolist()
         return np.vstack((x, np.zeros(num_sim_points), y)).T.tolist(), np.vstack((x, np.ones(num_sim_points) * self.width, y)).T.tolist()
 
-# pass in an array of the free cad objects (i.e. the mirror and the silicon cell) to set up the scen
-test_scene = OTSun.Scene([])
+    def getObj(self):
+        return self.obj
+
+
+Mirror = mirror(x0=1, y0=1/2, x1=0.9, y1=1/2, x2=1, y2=7/16, width=1 ).getObj()
+Semi = sillicon(x1=0.9, y1=1/2, x2=1, y2=7/16, width=1).getObj()
+
+print("boundbox:", Semi.Shape.BoundBox.DiagonalLength)
+
+# print(Mirror.label, Semi.label)
+
+# pass in an array of the free cad objects (i.e. the mirror and the silicon cell) to set up the scene
+
+test = Semi.Shape.BoundBox
+test.add(Mirror.Shape.BoundBox)
+print("full bb:", test, test.DiagonalLength)
+
+
+# materials
+otsun.ReflectorSpecularLayer("Mir1", 0.95)
+otsun.AbsorberSimpleLayer("Mat2", 0.9)
+
+
+
+test_scene = otsun.scene.Scene([  Mirror, Semi])
+# test_scene = otsun.scene.Scene([Semi])
+
+phi = 0.0
+theta = 45.0
+init_energy = 100
 
 # establish the direction of the rays
-emitting_region_mainDirection = [1, 0, 0]
+emitting_region_mainDirection = [1.0, 0.0, 0.0]
+main_direction = otsun.polar_to_cartesian(phi, theta) * -1.0  # Sun direction vector
 
 # establish a rectangular window that the arrays will emanate from
-emitting_region = OTSun.source.SunWindow(test_scene,  emitting_region_mainDirection)
+# emitting_region = otsun.source.SunWindow(test_scene,  emitting_region_mainDirection)
+emitting_region = otsun.source.SunWindow(test_scene,  main_direction)
+
 
 light_spectrum = WAVELENGTH_IN_NANOMETERS
 
 # establish a light source based on the scene, the emitting region, as well as the strength of the rays
-light_source = OTSun.source.LightSource(test_scene, emitting_region, light_spectrum, )
+light_source = otsun.source.LightSource(test_scene, emitting_region, light_spectrum, init_energy)
 
-experiment = OTSun.experiment(test_scene, None, None)
+experiment = otsun.Experiment(test_scene, None, None)
 
 experiment.run()
 thermal_energy = experiment.captured_energy_Th
