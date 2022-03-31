@@ -91,16 +91,22 @@ class sillicon():
         v7 = App.Vector(x1+thickness,width,y1+thickness)
         v8 = App.Vector(x2+thickness,width,y2+thickness)
         
-        f1 = self.make_face(v1,v2,v4,v3)
-        f2 = self.make_face(v5,v6,v8,v7)
-        f3 = self.make_face(v1,v3,v7,v5)
-        f4 = self.make_face(v2,v4,v8,v6)
-        f5 = self.make_face(v1,v5,v6,v2)
-        f6 = self.make_face(v3,v7,v8,v4)
+        # f1 = self.make_face(v1,v2,v4,v3)
+        # f2 = self.make_face(v5,v6,v8,v7)
+        # f3 = self.make_face(v1,v3,v7,v5)
+        # f4 = self.make_face(v2,v4,v8,v6)
+        # f5 = self.make_face(v1,v5,v6,v2)
+        # f6 = self.make_face(v3,v7,v8,v4)
     
-        shell=Part.makeShell([f1,f2,f3,f4,f5,f6])
-        solid=Part.makeSolid(shell)
-        self.Shape = solid
+        # shell=Draft.makeShell([f1,f2,f3,f4,f5,f6])
+        # solid=Draft.makeSolid(shell)
+        # self.Shape = solid
+        yaxis = App.Vector(0, 1, 0)
+        p3 = App.Vector(1, 1, 0)
+        place3 = App.Placement(p3, App.Rotation(yaxis, 45))
+        rectangle1 = Draft.make_rectangle(1, 2, placement=place3)
+        object1 = Draft.extrude(rectangle1, App.Vector(1,0,1))
+        object1.Solid = True
 
         #line_a, line_b = self.compute_edges()
 
@@ -109,20 +115,21 @@ class sillicon():
 
         App.ActiveDocument.recompute()
 
-        semi = App.ActiveDocument.addObject('PartDesign::FeaturePython', 'Semi-Conductor')
+        self.obj = App.ActiveDocument.addObject('Part::Feature', 'Semi-Conductor')
+        self.obj.Shape = object1.Shape
         #semi = App.ActiveDocument.addObject('Surface::GeomFillSurface', 'Semi-Conductor')
-        semi.Label = "Semi_Conductor(PV)"
+        self.obj.Label = "Semi_Conductor(PV)"
         #semi.BoundBox = [(f1, "Face1"), (f2, "Face2"), (f3, "Face3"), (f4, "Face4"), (f5, "Face5"), (f6, "Face6")]
         #semi.BoundaryList = [(lineA, "Edge1"), (lineB, "Edge1")]
 
-        self.obj = semi
+        #self.obj = semi
 
         App.ActiveDocument.recompute()
 
-    def make_face(self,v1,v2,v3,v4):
-     wire = Part.makePolygon([v1,v2,v3,v4])
-     face = Part.Face(wire)
-     return face
+    # def make_face(self,v1,v2,v3,v4):
+    #  wire = Draft.make_polygon([v1,v2,v3,v4])
+    #  face = Draft.Face(wire)
+    #  return face
 
     def compute_edges(self, num_sim_points=100):
         m = (self.y2 - self.y1) / (self.x2 - self.x1)
@@ -133,6 +140,18 @@ class sillicon():
 
         # return np.vstack((x, y, np.zeros(num_sim_points))).T.tolist(), np.vstack((x, y, np.ones(num_sim_points) * self.width)).T.tolist()
         return np.vstack((x, np.zeros(num_sim_points), y)).T.tolist(), np.vstack((x, np.ones(num_sim_points) * self.width, y)).T.tolist()
+
+
+    def compute_edges(self, num_sim_points=100):
+        m = (self.y2 - self.y1) / (self.x2 - self.x1)
+        b = self.y1 - (m*self.x1)
+        # eq: y = mx + b
+        x = np.linspace(self.x1, self.x2, num_sim_points)
+        y = (m * x) + b
+
+        # return np.vstack((x, y, np.zeros(num_sim_points))).T.tolist(), np.vstack((x, y, np.ones(num_sim_points) * self.width)).T.tolist()
+        return np.vstack((x, np.zeros(num_sim_points), y)).T.tolist(), np.vstack((x, np.ones(num_sim_points) * self.width, y)).T.tolist()
+
 
     def getObj(self):
         return self.obj
