@@ -64,13 +64,29 @@ class sillicon():
         
         line_a, line_b = self.compute_edges()
 
-        lineA = Draft.make_bspline([App.Vector(*p) for p in line_a])
-        lineB = Draft.make_bspline([App.Vector(*p) for p in line_b])
+        # lineA = Draft.make_bspline([App.Vector(*p) for p in line_a])
+        # lineB = Draft.make_bspline([App.Vector(*p) for p in line_b])
 
-        App.ActiveDocument.recompute()
+        # App.ActiveDocument.recompute()
 
-        semi = App.ActiveDocument.addObject('Surface::GeomFillSurface', 'Semi-Conductor')
-        semi.BoundaryList = [(lineA, "Edge1"), (lineB, "Edge1")]
+        # semi = App.ActiveDocument.addObject('Surface::GeomFillSurface', 'Semi-Conductor')
+        # semi.BoundaryList = [(lineA, "Edge1"), (lineB, "Edge1")]
+
+        zaxis = App.Vector(0, 0, 1)
+        p3 = App.Vector(1, 1, 0)
+        place3 = App.Placement(p3, App.Rotation(zaxis, 45))
+
+        rec = Draft.make_rectangle(2, 1, placement=place3)
+        self.Shape = Draft.extrude(rec, App.Vector(1,0,1))
+        self.Shape.Solid = True
+        semi = App.ActiveDocument.addObject('PartDesign::Body', 'Semi-Conductor')
+
+        print("Type: ", type(semi))
+
+        semi.addObject(self.Shape.getObj())
+
+        semi.Label = "Semi_Conductor(PV)"
+
 
         App.ActiveDocument.recompute()
 
