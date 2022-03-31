@@ -7,16 +7,10 @@ import Part
 import numpy as np
 from scipy.integrate import solve_ivp
 import Draft
-<<<<<<< HEAD
 from FreeCAD import Base
 import otsun
 
 WAVELENGTH_IN_NANOMETERS = 7
-=======
-import otsun
-
-WAVELENGTH_IN_NANOMETERS = 10
->>>>>>> ed142a833625fc1faeb79fe1b4c4f2e6c9e86ef8
 
 doc = App.newDocument()
 
@@ -83,7 +77,6 @@ class mirror():
 
 
 class sillicon():
-<<<<<<< HEAD
     def __init__(self, x1=0.9, y1=1/2, x2=1, y2=7/16, width=1.0) -> None:
         thickness = 0.25
         self.x1, self.y1, self.x2, self.y2, self.width, self.thickness = x1, y1, x2, y2, width, thickness
@@ -104,7 +97,7 @@ class sillicon():
         f4 = self.make_face(v2,v4,v8,v6)
         f5 = self.make_face(v1,v5,v6,v2)
         f6 = self.make_face(v3,v7,v8,v4)
-        semi.BoundBox = BoundBox()
+    
         shell=Part.makeShell([f1,f2,f3,f4,f5,f6])
         solid=Part.makeSolid(shell)
         self.Shape = solid
@@ -119,36 +112,17 @@ class sillicon():
         semi = App.ActiveDocument.addObject('PartDesign::FeaturePython', 'Semi-Conductor')
         #semi = App.ActiveDocument.addObject('Surface::GeomFillSurface', 'Semi-Conductor')
         semi.Label = "Semi_Conductor(PV)"
-        semi.BoundBox = [(f1, "Face1"), (f2, "Face2"), (f3, "Face3"), (f4, "Face4"), (f5, "Face5"), (f6, "Face6")]
+        #semi.BoundBox = [(f1, "Face1"), (f2, "Face2"), (f3, "Face3"), (f4, "Face4"), (f5, "Face5"), (f6, "Face6")]
         #semi.BoundaryList = [(lineA, "Edge1"), (lineB, "Edge1")]
-=======
-    def __init__(self, x1=0.9, y1=1/2, x2=1, y2=7/16, width=1) -> None:
-        self.x1, self.y1, self.x2, self.y2, self.width = x1, y1, x2, y2, width
-        
-        line_a, line_b = self.compute_edges()
-
-        lineA = Draft.make_bspline([App.Vector(*p) for p in line_a])
-        lineB = Draft.make_bspline([App.Vector(*p) for p in line_b])
-
-        App.ActiveDocument.recompute()
-
-        semi = App.ActiveDocument.addObject('Surface::GeomFillSurface', 'Semi-Conductor')
-        semi.Label = "Semi_Conductor(Mat2)"
-        semi.BoundaryList = [(lineA, "Edge1"), (lineB, "Edge1")]
->>>>>>> ed142a833625fc1faeb79fe1b4c4f2e6c9e86ef8
 
         self.obj = semi
 
         App.ActiveDocument.recompute()
 
-<<<<<<< HEAD
     def make_face(self,v1,v2,v3,v4):
      wire = Part.makePolygon([v1,v2,v3,v4])
      face = Part.Face(wire)
      return face
-=======
-
->>>>>>> ed142a833625fc1faeb79fe1b4c4f2e6c9e86ef8
 
     def compute_edges(self, num_sim_points=100):
         m = (self.y2 - self.y1) / (self.x2 - self.x1)
@@ -177,34 +151,21 @@ test = Semi.Shape.BoundBox
 test.add(Mirror.Shape.BoundBox)
 print("full bb:", test, test.DiagonalLength)
 
-<<<<<<< HEAD
 # file containing the index of refraction for a perovskite solar cell
 file_perovskite = "C:/Users/kates/AppData/Roaming/FreeCAD/Macro/capstone_simulation/sillicon_cell_refraction.txt"
 
 # materials
 otsun.ReflectorSpecularLayer("Mir1", 0.95)
 otsun.PVMaterial("PV", file_perovskite)
-=======
-
-# materials
-otsun.ReflectorSpecularLayer("Mir1", 0.95)
-otsun.AbsorberSimpleLayer("Mat2", 0.9)
->>>>>>> ed142a833625fc1faeb79fe1b4c4f2e6c9e86ef8
 
 
 
 test_scene = otsun.scene.Scene([  Mirror, Semi])
 # test_scene = otsun.scene.Scene([Semi])
 
-<<<<<<< HEAD
 phi = 0
 theta = 45.0
 init_energy = 1
-=======
-phi = 0.0
-theta = 45.0
-init_energy = 100
->>>>>>> ed142a833625fc1faeb79fe1b4c4f2e6c9e86ef8
 
 # establish the direction of the rays
 emitting_region_mainDirection = [1.0, 0.0, 0.0]
@@ -216,27 +177,15 @@ emitting_region = otsun.source.SunWindow(test_scene,  main_direction)
 
 
 light_spectrum = WAVELENGTH_IN_NANOMETERS
-<<<<<<< HEAD
 number_rays = 100
 # establish a light source based on the scene, the emitting region, as well as the strength of the rays
 light_source = otsun.source.LightSource(test_scene, emitting_region, light_spectrum, init_energy)
 
 experiment = otsun.Experiment(test_scene, light_source, number_rays)
-=======
-
-# establish a light source based on the scene, the emitting region, as well as the strength of the rays
-light_source = otsun.source.LightSource(test_scene, emitting_region, light_spectrum, init_energy)
-
-experiment = otsun.Experiment(test_scene, None, None)
->>>>>>> ed142a833625fc1faeb79fe1b4c4f2e6c9e86ef8
 
 experiment.run()
 thermal_energy = experiment.captured_energy_Th
 PV_energy = experiment.captured_energy_PV
 
-<<<<<<< HEAD
 print('\nThermal energy: ' + str(thermal_energy) + '\nPhotovoltaic energy: ' + str(PV_energy))
 
-=======
-print('\nThermal energy: ' + str(thermal_energy) + '\nPhotovoltaic energy: ' + str(PV_energy))
->>>>>>> ed142a833625fc1faeb79fe1b4c4f2e6c9e86ef8
