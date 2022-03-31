@@ -148,6 +148,7 @@ main_direction = otsun.polar_to_cartesian(phi, theta) * -1.0  # Sun direction ve
 emitting_region = otsun.source.SunWindow(test_scene,  main_direction)
 
 
+
 light_spectrum = WAVELENGTH_IN_NANOMETERS
 
 # establish a light source based on the scene, the emitting region, as well as the strength of the rays
