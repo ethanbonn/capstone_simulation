@@ -79,7 +79,7 @@ def simulate(init_energy=1, number_rays=1000):
                     #-<>-#-<>-# BEGIN EXPERIMENT #-<>-#-<>-#
 
                     # these are all using presets:
-                    MirrorParent = mirror(y0=1/2, x1=x1, y1=y1, x2=1, y2=y2, depth=1)
+                    MirrorParent = mirror(y0=1/2, x1=x1, y1=y1, x2=x2, y2=y2, depth=1)
                     SemiParent = sillicon(x1=x1, y1=y1, x2=x2, y2=y2, depth=1)
                     Mirror = MirrorParent.getObj()
                     Semi = SemiParent.getObj()
