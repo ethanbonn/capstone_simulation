@@ -11,7 +11,7 @@ import Draft
 from FreeCAD import Base
 import otsun
 import pandas as pd
-from cell import mirror, sillicon, silliconBack
+from cell import mirror, sillicon, silliconBack, top
 import time
 
 WAVELENGTH_IN_NANOMETERS = 7
@@ -21,18 +21,19 @@ doc = App.newDocument()
 # Need:
 # - init_energy
 
-def simulate(init_energy=1, number_rays=1000):
+def simulate(init_energy=4.180480200259445e-13):
+
 
     file_perovskite = "./sillicon_cell_refraction.txt"
 
 
     # materials
-    otsun.ReflectorSpecularLayer("Mir1", 0.95)
+    otsun.ReflectorSpecularLayer("Mir1", 0.999)
     otsun.AbsorberSimpleLayer("semiBack", 0.95)
     otsun.PVMaterial("PV", file_perovskite)
         
     phi = 0
-    theta = 45.0
+    theta = 90 #45.0
     #init_energy = 1 ####### NEED
 
     # establish the direction of the rays
@@ -57,7 +58,7 @@ def simulate(init_energy=1, number_rays=1000):
 
     # Create summary table for mirror statistics
 
-    statisic_columns = ['Trial', 'Length', 'Angle', 'x1', 'y1', 'x2', 'y2', 'Width', 'Height', 'Width Ratio', 'Height Ratio', 'Thermal Energy', ' PV Energy']
+    statisic_columns = ['Trial', 'Length', 'Angle', 'x1', 'y1', 'x2', 'y2', 'Width', 'Height', 'Width Ratio', 'Height Ratio', 'Thermal Energy', ' PV Energy', 'Optical Efficiency']
 
     statistics = np.zeros((len(x1_values) * len(y1_values) * len(angles) * len(lengths), len(statisic_columns)))
 
@@ -74,19 +75,37 @@ def simulate(init_energy=1, number_rays=1000):
                     x2 = x1 + L * np.cos(theta)
                     y2 = y1 - L * np.sin(theta)
                     # x_values = [x1, x2]
-                    # y_values = [y1, y2]       
+                    # y_values = [y1, y2]    
+
+
+                       
 
                     #-<>-#-<>-# BEGIN EXPERIMENT #-<>-#-<>-#
 
                     # these are all using presets:
-                    MirrorParent = mirror(y0=1/2, x1=x1, y1=y1, x2=1, y2=y2, depth=1)
+                    MirrorParent = mirror(y0=1/2, x1=x1, y1=y1, x2=x2, y2=y2, depth=1)
                     SemiParent = sillicon(x1=x1, y1=y1, x2=x2, y2=y2, depth=1)
                     Mirror = MirrorParent.getObj()
                     Semi = SemiParent.getObj()
                     SilliconBack = silliconBack(x1=x1, y1=y1, x2=x2, y2=y2, depth=1).getObj()  
+                    max_z, max_x = SemiParent.getVerticies()
+                    Top = top(max_z=max_z, max_x=max_x).getObj()
+
+                    aperture_collector_Th = doc.getObject("Top").Shape.Faces[0].Area 
+
+                    DNI = 2191 / (365 * 24 * 1000)
+                    number_rays = aperture_collector_Th * DNI / (init_energy * (1000 **2))
+
+                    print("number of rays:", number_rays)
+
+                    print("Creating:")
+                    print(f"mirror(y0=1/2, x1={x1}, y1={y1}, x2={x2}, y2={y2}, depth=1)")
+                    print(f"sillicon(x1={x1}, y1={y1}, x2={x2}, y2={y2}, depth=1)")
+                    print(f"silliconBack(x1={x1}, y1={y1}, x2={x2}, y2={y2}, depth=1)")
+                    print(f"top(max_z={max_z}, max_x={max_x})")
 
                     # pass in an array of the free cad objects (i.e. the mirror and the silicon cell) to set up the scene
-                    test_scene = otsun.scene.Scene([Mirror, Semi, SilliconBack])
+                    test_scene = otsun.scene.Scene([Mirror, Semi, SilliconBack, Top])
 
                     # establish a rectangular window that the arrays will emanate from
                     emitting_region = otsun.source.SunWindow(test_scene,  main_direction)
@@ -100,6 +119,11 @@ def simulate(init_energy=1, number_rays=1000):
                     experiment = otsun.Experiment(test_scene, light_source, number_rays)
                     experiment.run()
 
+                    efficiency_from_source_Th = (experiment.captured_energy_Th / aperture_collector_Th) / (
+                        experiment.number_of_rays / experiment.light_source.emitting_region.aperture)
+
+                    print(f"experiment.captured_energy_Th {experiment.captured_energy_Th} / aperture_collector_Th {aperture_collector_Th} / experiment.number_of_rays {experiment.number_of_rays} / experiment.light_source.emitting_region.aperture {experiment.light_source.emitting_region.aperture}")
+                    print("Optical Efficiency:", efficiency_from_source_Th)
                     print("Experiment Took:", time.perf_counter() - start_t)
 
                     # Record inputs:
@@ -116,6 +140,7 @@ def simulate(init_energy=1, number_rays=1000):
                     statistics[i - 1, 10] = statistics[i - 1, 8] / L
                     statistics[i - 1, 11] = experiment.captured_energy_Th
                     statistics[i - 1, 12] = experiment.captured_energy_PV   
+                    statistics[i - 1, 13] = efficiency_from_source_Th
 
                     #-<>-#-<>-# END EXPERIMENT #-<>-#-<>-#
                     i += 1

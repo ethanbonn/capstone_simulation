@@ -67,6 +67,41 @@ class mirror():
     def getObj(self):
         return self.obj
 
+class top():
+    def __init__(self, max_z=None, max_x=None, depth=1):
+        self.DELTA = 0.001
+        self.max_z, self.max_x, self.depth = max_z, max_x, depth
+
+        l1, l2 = self.lines()
+
+        curveA = Draft.make_bspline([App.Vector(*p) for p in l1])
+        curveB = Draft.make_bspline([App.Vector(*p) for p in l2])
+
+        # doc.recompute()
+
+
+        top = App.ActiveDocument.addObject('Surface::GeomFillSurface', 'Top')
+        # mirror.Label = "Mirror #1"
+        top.Label = "Top(Coating)"
+        top.BoundaryList = [(curveA, "Edge1"), (curveB, "Edge1")]
+
+        self.obj = top
+
+        App.ActiveDocument.recompute()
+
+
+
+
+    def lines(self):
+        ## ADD DELTAS
+        line_1 = np.linspace( ( 0, 0, self.max_z ), ( self.max_x, 0, self.max_z + self.DELTA), 10 )
+        line_2 = np.linspace( ( 0, self.depth, self.max_z ), ( self.max_x, self.depth, self.max_z + self.DELTA), 10 )
+        return line_1, line_2
+
+        
+    def getObj(self):
+        return self.obj
+
 class sillicon():
     def __init__(self, x1=0.9, y1=1/2, x2=1, y2=7/16, depth=1.0) -> None:
         thickness = 0.5
@@ -143,6 +178,15 @@ class sillicon():
 
     def getObj(self):
         return self.obj
+
+    def getVerticies(self):
+        # z MAX
+        z_max = self.obj.Shape.Vertexes[1].Z
+
+        # X MAX 
+        x_max = self.obj.Shape.Vertexes[3].X
+
+        return z_max, x_max
 
 
 
