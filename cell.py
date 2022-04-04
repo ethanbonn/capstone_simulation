@@ -103,14 +103,15 @@ class top():
         return self.obj
 
 class sillicon():
-    def __init__(self, x1=0.9, y1=1/2, x2=1, y2=7/16, depth=1.0) -> None:
+    def __init__(self, x1=0.9, y1=1/2, x2=1, y2=7/16, depth=1.0, theta=0) -> None:
         thickness = 0.5
         self.x1, self.y1, self.x2, self.y2, self.depth, self.thickness = x1, y1, x2, y2, depth, thickness
+
         
         baseLength = depth
         baseWidth = math.sqrt((x2-x1)**2 + (y2-y1)**2)
 
-        angleOfRotation = math.degrees(math.atan((y1-y2)/(x2-x1)))
+        angleOfRotation = theta # math.degrees(math.atan((y1-y2)/(x2-x1)))
 
         # extrudeRotate = math.degrees(math.atan((x2-x1)/(y2-y1)))
         # extrudeRotate = 90-extrudeRotate

@@ -21,7 +21,8 @@ doc = App.newDocument()
 # Need:
 # - init_energy
 
-def simulate(init_energy=4.180480200259445e-13):
+def simulate(init_energy=1):
+    # init_energy = 4.180480200259445e-13
 
 
     file_perovskite = "./sillicon_cell_refraction.txt"
@@ -31,9 +32,10 @@ def simulate(init_energy=4.180480200259445e-13):
     otsun.ReflectorSpecularLayer("Mir1", 0.999)
     otsun.AbsorberSimpleLayer("semiBack", 0.95)
     otsun.PVMaterial("PV", file_perovskite)
+    otsun.TransparentSimpleLayer("Coating", 0.99)
         
     phi = 0
-    theta = 90 #45.0
+    theta = 0 #90 #45.0
     #init_energy = 1 ####### NEED
 
     # establish the direction of the rays
@@ -52,8 +54,8 @@ def simulate(init_energy=4.180480200259445e-13):
 
     x1_values = [1.5]
     y1_values = [0.8]
-    angles = [0, np.pi / 6]
-    lengths = [0.1, 0.2]
+    angles = [0, 10, 20, 30, 40, 50, 60, 70, 80]
+    lengths = [1]
 
 
     # Create summary table for mirror statistics
@@ -84,7 +86,7 @@ def simulate(init_energy=4.180480200259445e-13):
 
                     # these are all using presets:
                     MirrorParent = mirror(y0=1/2, x1=x1, y1=y1, x2=x2, y2=y2, depth=1)
-                    SemiParent = sillicon(x1=x1, y1=y1, x2=x2, y2=y2, depth=1)
+                    SemiParent = sillicon(x1=x1, y1=y1, x2=x2, y2=y2, depth=1, theta=theta)
                     Mirror = MirrorParent.getObj()
                     Semi = SemiParent.getObj()
                     SilliconBack = silliconBack(x1=x1, y1=y1, x2=x2, y2=y2, depth=1).getObj()  
@@ -94,13 +96,13 @@ def simulate(init_energy=4.180480200259445e-13):
                     aperture_collector_Th = doc.getObject("Top").Shape.Faces[0].Area 
 
                     DNI = 2191 / (365 * 24 * 1000)
-                    number_rays = aperture_collector_Th * DNI / (init_energy * (1000 **2))
+                    number_rays = 100 #aperture_collector_Th * DNI / (init_energy * (1000 **2))
 
                     print("number of rays:", number_rays)
 
                     print("Creating:")
                     print(f"mirror(y0=1/2, x1={x1}, y1={y1}, x2={x2}, y2={y2}, depth=1)")
-                    print(f"sillicon(x1={x1}, y1={y1}, x2={x2}, y2={y2}, depth=1)")
+                    print(f"sillicon(x1={x1}, y1={y1}, x2={x2}, y2={y2}, depth=1, theta={theta})")
                     print(f"silliconBack(x1={x1}, y1={y1}, x2={x2}, y2={y2}, depth=1)")
                     print(f"top(max_z={max_z}, max_x={max_x})")
 
