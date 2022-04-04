@@ -103,10 +103,10 @@ class top():
         return self.obj
 
 class sillicon():
-    def __init__(self, x1=0.9, y1=1/2, x2=1, y2=7/16, depth=1.0, theta=0) -> None:
-        thickness = 0.5
+    def __init__(self, x1=0.9, y1=1/2, x2=1, y2=7/16, depth=1.0, theta=0, thickness=0.1) -> None:
         self.x1, self.y1, self.x2, self.y2, self.depth, self.thickness = x1, y1, x2, y2, depth, thickness
-
+        DELTA = 0.001
+        BACK_THICKNESS = 0.001
         
         baseLength = depth
         baseWidth = math.sqrt((x2-x1)**2 + (y2-y1)**2)
@@ -157,6 +157,16 @@ class sillicon():
         #semi.BoundBox = [(f1, "Face1"), (f2, "Face2"), (f3, "Face3"), (f4, "Face4"), (f5, "Face5"), (f6, "Face6")]
         #semi.BoundaryList = [(lineA, "Edge1"), (lineB, "Edge1")]
 
+        #BACK
+        pos2 = App.Vector(x1+baseWidth*(5/7), 0, y1 + thickness)
+        place2 = App.Placement(pos, App.Rotation(yaxis, angleOfRotation))
+        rectangle1 = Draft.make_rectangle(baseWidth, baseLength, placement=place)
+        object1 = Draft.extrude(rectangle1, App.Vector((y1-y2)*BACK_THICKNESS,0,(x2-x1)*BACK_THICKNESS))
+        object1.Solid = True
+        self.back = App.ActiveDocument.addObject('Part::Feature', 'Semi_ConductorBack')
+        self.back.Label = "Semi_ConductorBack(semiBack)"
+        # self.back.BoundaryList = [(lineA, "Edge1"), (lineB, "Edge1")]
+
         #self.obj = semi
 
         App.ActiveDocument.recompute()
@@ -179,6 +189,9 @@ class sillicon():
 
     def getObj(self):
         return self.obj
+
+    def getBack(self):
+        return self.back
 
     def getVerticies(self):
         # z MAX

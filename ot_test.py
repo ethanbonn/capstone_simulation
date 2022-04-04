@@ -52,10 +52,13 @@ def simulate(init_energy=1):
     # angles = [0, np.pi / 6, np.pi / 5, np.pi / 4, np. pi / 3, np.pi / 2]
     # lengths = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6]
 
-    x1_values = np.linspace(0.8, 2, 5) #[1.5]
-    y1_values = np.linspace(0.6, 1.5, 5) #[0.8]
+    x1_values = np.linspace(0.8, 1.5, 3) #[1.5]
+    y1_values = np.linspace(0.6, 1.5, 3) #[0.8]
     angles = np.linspace(0, 20, 3) #[0, 5, 11, 20, 30, 40, 50, 60, 70, 80]
-    lengths = np.linspace(0.5, 1.5) #[1]
+    lengths = np.linspace(0.5, 1.5, 2) #[1]
+    thickness = [0.1, ]
+    # Format: (x1, y1, theta, L, thickness)
+    test_cases = [(0.5, 1.1, 30, 0.2, 0.1), (0.5, 1.1, 45, 0.3, 0.1)]
 
 
     # Create summary table for mirror statistics
@@ -68,91 +71,97 @@ def simulate(init_energy=1):
     y0 = 1.0
 
     i = 1
-    for x1 in x1_values:
-        for y1 in y1_values:
-            for theta in angles:
-                for L in lengths:
-                    
-                    # Input parameters
-                    x2 = x1 + L * np.cos(theta)
-                    y2 = y1 - L * np.sin(theta)
-                    # x_values = [x1, x2]
-                    # y_values = [y1, y2]    
+    # for x1 in x1_values:
+    #     for y1 in y1_values:
+    #         for theta in angles:
+    #             for L in lengths:
+
+    for (x1, y1, theta, L, thickness) in test_cases:    
+        # Input parameters
+        x2 = x1 + L * np.cos(theta)
+        y2 = y1 - L * np.sin(theta)
+        # x_values = [x1, x2]
+        # y_values = [y1, y2]    
 
 
-                       
+            
 
-                    #-<>-#-<>-# BEGIN EXPERIMENT #-<>-#-<>-#
+        #-<>-#-<>-# BEGIN EXPERIMENT #-<>-#-<>-#
 
-                    # these are all using presets:
-                    MirrorParent = mirror(y0=1/2, x1=x1, y1=y1, x2=x2, y2=y2, depth=1)
-                    SemiParent = sillicon(x1=x1, y1=y1, x2=x2, y2=y2, depth=1, theta=theta)
-                    Mirror = MirrorParent.getObj()
-                    Semi = SemiParent.getObj()
-                    SilliconBack = silliconBack(x1=x1, y1=y1, x2=x2, y2=y2, depth=1).getObj()  
-                    max_z, max_x = SemiParent.getVerticies()
-                    Top = top(max_z=max_z, max_x=max_x).getObj()
+        # these are all using presets:
+        MirrorParent = mirror(y0=1/2, x1=x1, y1=y1, x2=x2, y2=y2, depth=1)
+        SemiParent = sillicon(x1=x1, y1=y1, x2=x2, y2=y2, depth=1, theta=theta, thickness=thickness)
+        Mirror = MirrorParent.getObj()
+        Semi = SemiParent.getObj()
+        SilliconBack = silliconBack(x1=x1, y1=y1, x2=x2, y2=y2, depth=1).getObj()  
+        max_z, max_x = SemiParent.getVerticies()
+        Top = top(max_z=max_z, max_x=max_x).getObj()
 
-                    aperture_collector_Th = doc.getObject("Top").Shape.Faces[0].Area 
+        aperture_collector_Th = doc.getObject("Top").Shape.Faces[0].Area 
 
-                    DNI = 2191 / (365 * 24 * 1000)
-                    number_rays = 500 #aperture_collector_Th * DNI / (init_energy * (1000 **2))
+        DNI = 2191 / (365 * 24 * 1000)
+        number_rays = 500#aperture_collector_Th * DNI / (init_energy * (1000 **2))
 
-                    print("number of rays:", number_rays)
+        print('-' * 30)
 
-                    print("Creating:")
-                    print(f"mirror(y0=1/2, x1={x1}, y1={y1}, x2={x2}, y2={y2}, depth=1)")
-                    print(f"sillicon(x1={x1}, y1={y1}, x2={x2}, y2={y2}, depth=1, theta={theta})")
-                    print(f"silliconBack(x1={x1}, y1={y1}, x2={x2}, y2={y2}, depth=1)")
-                    print(f"top(max_z={max_z}, max_x={max_x})")
-                    print(L)
+        print("Starting Trial:", i)
 
-                    # pass in an array of the free cad objects (i.e. the mirror and the silicon cell) to set up the scene
-                    test_scene = otsun.scene.Scene([Mirror, Semi, SilliconBack, Top])
+        print("number of rays:", number_rays)
 
-                    # establish a rectangular window that the arrays will emanate from
-                    emitting_region = otsun.source.SunWindow(test_scene,  main_direction)
+        print("Creating:")
+        print(f"mirror(y0=1, x1={x1}, y1={y1}, x2={x2}, y2={y2}, depth=1)")
+        print(f"sillicon(x1={x1}, y1={y1}, x2={x2}, y2={y2}, depth=1, theta={theta})")
+        print(f"silliconBack(x1={x1}, y1={y1}, x2={x2}, y2={y2}, depth=1)")
+        print(f"top(max_z={max_z}, max_x={max_x})")
+        print(L)
 
-                    # establish a light source based on the scene, the emitting region, as well as the strength of the rays
-                    light_source = otsun.source.LightSource(test_scene, emitting_region, light_spectrum, init_energy)
+        # pass in an array of the free cad objects (i.e. the mirror and the silicon cell) to set up the scene
+        # test_scene = otsun.scene.Scene([ Mirror, Semi, SilliconBack, Top])
+        test_scene = otsun.scene.Scene([ Mirror, Semi, SilliconBack, Top ])
 
-                    start_t = time.perf_counter()
-                    print("Starting Trial:", i)
+        # establish a rectangular window that the arrays will emanate from
+        emitting_region = otsun.source.SunWindow(test_scene,  main_direction)
 
-                    experiment = otsun.Experiment(test_scene, light_source, number_rays)
-                    experiment.run()
+        # establish a light source based on the scene, the emitting region, as well as the strength of the rays
+        light_source = otsun.source.LightSource(test_scene, emitting_region, light_spectrum, init_energy)
 
-                    efficiency_from_source_Th = (experiment.captured_energy_Th / aperture_collector_Th) / (
-                        experiment.number_of_rays / experiment.light_source.emitting_region.aperture)
-
-                    efficiency_from_source_PV = (experiment.captured_energy_PV / aperture_collector_Th) / (
-                        experiment.number_of_rays / experiment.light_source.emitting_region.aperture)
-
-                    print(f"experiment.captured_energy_Th {experiment.captured_energy_Th} / aperture_collector_Th {aperture_collector_Th} / experiment.number_of_rays {experiment.number_of_rays} / experiment.light_source.emitting_region.aperture {experiment.light_source.emitting_region.aperture}")
-                    print("Optical Efficiency (TH):", efficiency_from_source_Th)
-                    print("Optical Efficiency (PV):", efficiency_from_source_PV)
-                    print("Experiment Took:", time.perf_counter() - start_t)
-
-                    # Record inputs:
-                    statistics[i - 1, 0] = i
-                    statistics[i - 1, 1] = L
-                    statistics[i - 1, 2] = theta
-                    statistics[i - 1, 3] = x1
-                    statistics[i - 1, 4] = y1
-                    statistics[i - 1, 5] = x2
-                    statistics[i - 1, 6] = y2    
-                    statistics[i - 1, 7] = MirrorParent.width
-                    statistics[i - 1, 9] = statistics[i - 1, 7] / L
-                    statistics[i - 1, 8] = MirrorParent.height
-                    statistics[i - 1, 10] = statistics[i - 1, 8] / L
-                    statistics[i - 1, 11] = experiment.captured_energy_Th
-                    statistics[i - 1, 12] = experiment.captured_energy_PV   
-                    statistics[i - 1, 13] = efficiency_from_source_Th
-                    statistics[i - 1, 14] = efficiency_from_source_PV
+        start_t = time.perf_counter()
 
 
-                    #-<>-#-<>-# END EXPERIMENT #-<>-#-<>-#
-                    i += 1
+        experiment = otsun.Experiment(test_scene, light_source, number_rays)
+        experiment.run()
+
+        efficiency_from_source_Th = (experiment.captured_energy_Th / aperture_collector_Th) / (
+            experiment.number_of_rays / experiment.light_source.emitting_region.aperture)
+
+        efficiency_from_source_PV = (experiment.captured_energy_PV / aperture_collector_Th) / (
+            experiment.number_of_rays / experiment.light_source.emitting_region.aperture)
+
+        print(f"experiment.captured_energy_Th {experiment.captured_energy_Th} / aperture_collector_Th {aperture_collector_Th} / experiment.number_of_rays {experiment.number_of_rays} / experiment.light_source.emitting_region.aperture {experiment.light_source.emitting_region.aperture}")
+        print("Optical Efficiency (TH):", efficiency_from_source_Th)
+        print("Optical Efficiency (PV):", efficiency_from_source_PV)
+        print("Experiment Took:", time.perf_counter() - start_t)
+
+        # Record inputs:
+        statistics[i - 1, 0] = i
+        statistics[i - 1, 1] = L
+        statistics[i - 1, 2] = theta
+        statistics[i - 1, 3] = x1
+        statistics[i - 1, 4] = y1
+        statistics[i - 1, 5] = x2
+        statistics[i - 1, 6] = y2    
+        statistics[i - 1, 7] = MirrorParent.width
+        statistics[i - 1, 9] = statistics[i - 1, 7] / L
+        statistics[i - 1, 8] = MirrorParent.height
+        statistics[i - 1, 10] = statistics[i - 1, 8] / L
+        statistics[i - 1, 11] = experiment.captured_energy_Th
+        statistics[i - 1, 12] = experiment.captured_energy_PV   
+        statistics[i - 1, 13] = efficiency_from_source_Th
+        statistics[i - 1, 14] = efficiency_from_source_PV
+
+
+        #-<>-#-<>-# END EXPERIMENT #-<>-#-<>-#
+        i += 1
     return pd.DataFrame(statistics, columns = statisic_columns)
 
 def single_sim(init_energy=1):
@@ -173,7 +182,7 @@ def single_sim(init_energy=1):
     #init_energy = 1 ####### NEED
 
     # establish the direction of the rays
-    main_direction = otsun.polar_to_cartesian(phi, theta) * -1.0  # Sun direction vector
+    main_direction = otsun.polar_to_cartesian(phi, theta) #* -1.0  # Sun direction vector
 
     light_spectrum = WAVELENGTH_IN_NANOMETERS
 
@@ -207,7 +216,7 @@ def single_sim(init_energy=1):
     SemiParent = sillicon(x1=x1, y1=y1, x2=x2, y2=y2, depth=1, theta=theta)
     Mirror = MirrorParent.getObj()
     Semi = SemiParent.getObj()
-    SilliconBack = silliconBack(x1=x1, y1=y1, x2=x2, y2=y2, depth=1).getObj()  
+    SilliconBack = SemiParent.getBack() #silliconBack(x1=x1, y1=y1, x2=x2, y2=y2, depth=1).getObj()  
     max_z, max_x = SemiParent.getVerticies()
     Top = top(max_z=max_z, max_x=max_x).getObj()
 
