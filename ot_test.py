@@ -30,16 +30,16 @@ def simulate(init_energy=1):
 
     # materials
     otsun.ReflectorSpecularLayer("Mir1", 0.999)
-    otsun.AbsorberSimpleLayer("semiBack", 0.95)
+    otsun.AbsorberSimpleLayer("semiBack", 1)
     otsun.PVMaterial("PV", file_perovskite)
     otsun.TransparentSimpleLayer("Coating", 0.99)
         
     phi = 0
-    theta = 0 #90 #45.0
+    theta = 0 #45.0
     #init_energy = 1 ####### NEED
 
     # establish the direction of the rays
-    main_direction = otsun.polar_to_cartesian(phi, theta) * -1.0  # Sun direction vector
+    main_direction = otsun.polar_to_cartesian(phi, theta) * -1.0  # Sun direction vector, without -1 TH -> 0
 
     light_spectrum = WAVELENGTH_IN_NANOMETERS
 
@@ -58,7 +58,7 @@ def simulate(init_energy=1):
     lengths = np.linspace(0.5, 1.5, 2) #[1]
     thickness = [0.1, ]
     # Format: (x1, y1, theta, L, thickness)
-    test_cases = [(0.5, 1.1, 30, 0.2, 0.1), (0.5, 1.1, 45, 0.3, 0.1)]
+    test_cases = [(1.5, 1.1, 30, 0.1, 0.1)]#[(0.8, 1.1, 30, 0.1, 0.1)]#(0.5, 1.1, 0.01, 0.2, 0.1)]#, (0.5, 1.1, 45, 0.3, 0.1)]
 
 
     # Create summary table for mirror statistics
@@ -99,8 +99,9 @@ def simulate(init_energy=1):
 
         aperture_collector_Th = doc.getObject("Top").Shape.Faces[0].Area 
 
+
         DNI = 2191 / (365 * 24 * 1000)
-        number_rays = 500#aperture_collector_Th * DNI / (init_energy * (1000 **2))
+        number_rays = 1000 #aperture_collector_Th * DNI / (init_energy * (1000 **2))
 
         print('-' * 30)
 
@@ -117,7 +118,11 @@ def simulate(init_energy=1):
 
         # pass in an array of the free cad objects (i.e. the mirror and the silicon cell) to set up the scene
         # test_scene = otsun.scene.Scene([ Mirror, Semi, SilliconBack, Top])
-        test_scene = otsun.scene.Scene([ Mirror, Semi, SilliconBack, Top ])
+        test_scene = otsun.scene.Scene([ Mirror, Top, SilliconBack ])
+
+        print(Semi.Shape.BoundBox)
+
+        print("BOUND: ", test_scene.boundbox)
 
         # establish a rectangular window that the arrays will emanate from
         emitting_region = otsun.source.SunWindow(test_scene,  main_direction)

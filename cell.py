@@ -37,7 +37,7 @@ class mirror():
 
         # Calculate CPV cell length from coordiantes of the mirror endpoints
 
-        L = np.sqrt((self.x2 - self.x1)**2 + (self.y2 - self.y1)**2)
+        L = np.sqrt((self.x2 - self.x1)**2 + (self.y1 - self.y2)**2)
 
 
         # In[7]:
@@ -103,10 +103,10 @@ class top():
         return self.obj
 
 class sillicon():
-    def __init__(self, x1=0.9, y1=1/2, x2=1, y2=7/16, depth=1.0, theta=0, thickness=0.1) -> None:
+    def __init__(self, x1=0.9, y1=1/2, x2=1, y2=7/16, depth=1.0, theta=0, thickness=0.001) -> None:
         self.x1, self.y1, self.x2, self.y2, self.depth, self.thickness = x1, y1, x2, y2, depth, thickness
         DELTA = 0.001
-        BACK_THICKNESS = 0.001
+        BACK_THICKNESS = 0.1
         
         baseLength = depth
         baseWidth = math.sqrt((x2-x1)**2 + (y2-y1)**2)
@@ -142,6 +142,9 @@ class sillicon():
         rectangle1 = Draft.make_rectangle(baseWidth, baseLength, placement=place)
         object1 = Draft.extrude(rectangle1, App.Vector((y1-y2)*thickness,0,(x2-x1)*thickness))
         object1.Solid = True
+        self.obj = object1
+        self.obj.Label = "Semi_Conductor(PV)"
+
 
         #line_a, line_b = self.compute_edges()
 
@@ -150,10 +153,10 @@ class sillicon():
 
         App.ActiveDocument.recompute()
 
-        self.obj = App.ActiveDocument.addObject('Part::Feature', 'Semi-Conductor')
-        self.obj.Shape = object1.Shape
+        # self.obj = App.ActiveDocument.addObject('Part::Feature', 'Semi-Conductor')
+        # self.obj.Shape = object1.Shape
         #semi = App.ActiveDocument.addObject('Surface::GeomFillSurface', 'Semi-Conductor')
-        self.obj.Label = "Semi_Conductor(PV)"
+        # self.obj.Label = "Semi_Conductor(PV)"
         #semi.BoundBox = [(f1, "Face1"), (f2, "Face2"), (f3, "Face3"), (f4, "Face4"), (f5, "Face5"), (f6, "Face6")]
         #semi.BoundaryList = [(lineA, "Edge1"), (lineB, "Edge1")]
 
@@ -161,9 +164,9 @@ class sillicon():
         pos2 = App.Vector(x1+baseWidth*(5/7), 0, y1 + thickness)
         place2 = App.Placement(pos, App.Rotation(yaxis, angleOfRotation))
         rectangle1 = Draft.make_rectangle(baseWidth, baseLength, placement=place)
-        object1 = Draft.extrude(rectangle1, App.Vector((y1-y2)*BACK_THICKNESS,0,(x2-x1)*BACK_THICKNESS))
-        object1.Solid = True
-        self.back = App.ActiveDocument.addObject('Part::Feature', 'Semi_ConductorBack')
+        object2 = Draft.extrude(rectangle1, App.Vector((y1-y2)*BACK_THICKNESS,0,(x2-x1)*BACK_THICKNESS))
+        object2.Solid = True
+        self.back = object2 #App.ActiveDocument.addObject('Part::Feature', 'Semi_ConductorBack')
         self.back.Label = "Semi_ConductorBack(semiBack)"
         # self.back.BoundaryList = [(lineA, "Edge1"), (lineB, "Edge1")]
 
@@ -241,3 +244,18 @@ class silliconBack():
 
     def getObj(self):
         return self.obj
+
+def create(x1=0.5, y1=1.1, theta=0.01, L=0.2, thickness=0.1):
+    # def create(y0=1, x1=0.9, y1=1/2, x2=1, y2=7/16, depth=1.0, theta=0, thickness=0.001):
+    y0 = 1.0
+    x2 = x1 + L * np.cos(theta)
+    y2 = y1 - L * np.sin(theta)
+
+    MirrorParent = mirror(y0=y0, x1=x1, y1=y1, x2=x2, y2=y2, depth=1)
+    SemiParent = sillicon(x1=x1, y1=y1, x2=x2, y2=y2, depth=1, theta=theta, thickness=thickness)
+    # Mirror = MirrorParent.getObj()
+    # Semi = SemiParent.getObj()
+    # SilliconBack = SemiParent.getBack() #silliconBack(x1=x1, y1=y1, x2=x2, y2=y2, depth=1).getObj()  
+    max_z, max_x = SemiParent.getVerticies()
+    Top = top(max_z=max_z, max_x=max_x)#.getObj()
+
